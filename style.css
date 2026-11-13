@@ -1,3 +1,4 @@
+/* Color Palette Variables */
 :root {
   --bg-dark: #0f172a;
   --bg-card: #1e293b;
@@ -10,6 +11,7 @@
   --border-color: #334155;
 }
 
+/* Global Reset & Base Typography */
 * {
   margin: 0;
   padding: 0;
@@ -29,6 +31,7 @@ body {
   margin: 0 auto;
 }
 
+/* Header Styling */
 header {
   text-align: center;
   margin-bottom: 2rem;
@@ -50,6 +53,7 @@ header p {
   margin-top: 0.3rem;
 }
 
+/* Controls & Form Inputs */
 .controls-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -90,6 +94,7 @@ input:focus, select:focus {
   border-color: var(--accent-teal);
 }
 
+/* Action Buttons */
 .btn-group {
   display: flex;
   gap: 0.5rem;
@@ -129,6 +134,7 @@ button:disabled {
   color: var(--text-light);
 }
 
+/* Scoreboard & Status Badges */
 .scoreboard {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -194,6 +200,7 @@ button:disabled {
   font-size: 1.2rem;
 }
 
+/* Play-by-Point Commentary Feed */
 .feed-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -263,6 +270,7 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+/* Mobile Responsiveness */
 @media (max-width: 600px) {
   .score-digits { font-size: 3rem; }
   .team-box h2 { font-size: 1.1rem; }
