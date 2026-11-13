@@ -44,6 +44,9 @@
     <!-- Live Scoreboard & Possession Display -->
     <div class="scoreboard">
       <div class="status-badge" id="game-status">Ready for Pull</div>
+      <div id="series-record" style="margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+        All-Time Series: Home 0 — Away 0
+      </div>
       <div class="score-grid">
         <div class="team-box">
           <h2 id="display-home-name">Apex Ultimate</h2>
@@ -70,6 +73,16 @@
       </ul>
     </div>
   </div>
+
+  <div class="feed-card" style="margin-top: 1.5rem;">
+      <div class="feed-header">
+        <h3>Recent Match History</h3>
+        <button type="button" class="btn-reset" id="clear-history-btn" style="flex: 0; padding: 0.35rem 0.75rem; font-size: 0.8rem;">Clear History</button>
+      </div>
+      <ul class="log-list" id="history-log">
+        <li class="log-item system">No completed games saved yet.</li>
+      </ul>
+    </div>
 
   <!-- Link to the external JavaScript logic -->
   <script src="script.js"></script>
