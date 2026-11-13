@@ -1,11 +1,13 @@
+// Game state variables
 var homeScore = 0;
 var awayScore = 0;
 var pointsPlayed = 0;
-var offenseTeam = 'home';
+var offenseTeam = 'home'; // Tracks which team is currently receiving on offense
 var halfTimeTaken = false;
-var simTimer = null;
+var simTimer = null;      // Holds the interval timer ID
 var isRunning = false;
 
+// Randomized play descriptions for point commentary
 var plays = [
   "threads a 50-yard backhand huck into the back corner for the score!",
   "grinds out a 14-pass possession before hitting a crisp flick in the endzone.",
@@ -17,6 +19,7 @@ var plays = [
   "works the disc cleanly up the break side for an effortless score."
 ];
 
+// Syncs input fields with the scoreboard team headers
 function updateTeamHeaders() {
   var homeInput = document.getElementById('home-name').value.trim() || "Home";
   var awayInput = document.getElementById('away-name').value.trim() || "Away";
@@ -25,11 +28,13 @@ function updateTeamHeaders() {
   return { home: homeInput, away: awayInput };
 }
 
+// Updates which team is pulling (D) vs receiving (O) on the scoreboard
 function updateOffenseIndicator() {
   document.getElementById('home-offense').textContent = offenseTeam === 'home' ? 'PULLING / ON D' : 'RECEIVING / ON O';
   document.getElementById('away-offense').textContent = offenseTeam === 'away' ? 'PULLING / ON D' : 'RECEIVING / ON O';
 }
 
+// Prepends a new commentary entry to the top of the play log
 function addLog(message, type, showScore) {
   var logList = document.getElementById('play-log');
   var li = document.createElement('li');
@@ -39,6 +44,7 @@ function addLog(message, type, showScore) {
   textSpan.textContent = message;
   li.appendChild(textSpan);
 
+  // Attach the current score pill if a point was scored
   if (showScore) {
     var scoreSpan = document.createElement('span');
     scoreSpan.className = 'log-score';
@@ -49,6 +55,7 @@ function addLog(message, type, showScore) {
   logList.prepend(li);
 }
 
+// Evaluates official Ultimate win conditions (to 15, win by 2, hard cap at 17)
 function checkWinner() {
   var teams = updateTeamHeaders();
   if ((homeScore >= 15 && homeScore - awayScore >= 2) || homeScore === 17) return teams.home;
@@ -56,15 +63,18 @@ function checkWinner() {
   return null;
 }
 
+// Simulates a single point, updates scores, and checks for half-time or game end
 function simulatePoint() {
   var teams = updateTeamHeaders();
   pointsPlayed++;
   document.getElementById('point-counter').textContent = 'Points Played: ' + pointsPlayed;
 
+  // Offense has a 58% chance to hold; defense has a 42% chance to break
   var offenseScores = Math.random() < 0.58;
   var scoringTeam = offenseScores ? offenseTeam : (offenseTeam === 'home' ? 'away' : 'home');
   var tag = offenseScores ? '[HOLD] ' : '[BREAK] ';
 
+  // Increment score for the scoring team
   if (scoringTeam === 'home') {
     homeScore++;
     document.getElementById('home-score').textContent = homeScore;
@@ -73,15 +83,18 @@ function simulatePoint() {
     document.getElementById('away-score').textContent = awayScore;
   }
 
+  // Build and log the commentary line
   var teamName = scoringTeam === 'home' ? teams.home : teams.away;
   var playDesc = plays[Math.floor(Math.random() * plays.length)];
   var logType = scoringTeam === 'home' ? 'goal-home' : 'goal-away';
 
   addLog(tag + teamName + ' ' + playDesc, logType, true);
 
+  // Scoring team pulls on the next point, flipping possession
   offenseTeam = scoringTeam === 'home' ? 'away' : 'home';
   updateOffenseIndicator();
 
+  // Check for half-time (first team to 8) or Universe Point (16-16)
   var statusBadge = document.getElementById('game-status');
   if (!halfTimeTaken && (homeScore === 8 || awayScore === 8)) {
     halfTimeTaken = true;
@@ -93,6 +106,7 @@ function simulatePoint() {
     statusBadge.className = 'status-badge';
   }
 
+  // Stop simulation and announce winner if win condition is met
   var winner = checkWinner();
   if (winner) {
     clearInterval(simTimer);
@@ -109,6 +123,7 @@ function simulatePoint() {
   }
 }
 
+// Starts the simulation loop using the selected speed interval
 function startSimulation() {
   if (isRunning) return;
   if (checkWinner()) resetGame();
@@ -123,6 +138,7 @@ function startSimulation() {
   statusBadge.textContent = 'In Progress';
   statusBadge.className = 'status-badge';
 
+  // Flip the disc at the start of a fresh game
   if (pointsPlayed === 0) {
     document.getElementById('play-log').innerHTML = '';
     offenseTeam = Math.random() < 0.5 ? 'home' : 'away';
@@ -135,6 +151,7 @@ function startSimulation() {
   simTimer = setInterval(simulatePoint, speed);
 }
 
+// Resets all scores, timers, and UI elements back to pre-game state
 function resetGame() {
   clearInterval(simTimer);
   isRunning = false;
@@ -160,5 +177,6 @@ function resetGame() {
   document.getElementById('play-log').innerHTML = '<li class="log-item system">Click "Simulate" to flip the disc and start the match.</li>';
 }
 
+// Attach click event listeners to the control buttons
 document.getElementById('start-btn').addEventListener('click', startSimulation);
 document.getElementById('reset-btn').addEventListener('click', resetGame);
