@@ -270,6 +270,12 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+#clear-history-button {
+  flex: 0; 
+  padding: 0.35rem 0.75rem; 
+  font-size: 0.8rem;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 600px) {
   .score-digits { font-size: 3rem; }
