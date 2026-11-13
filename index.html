@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Frisbee Game Simulator</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --accent-teal: #14b8a6;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.5;
+            padding: 2rem 5%;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        header h1 span {
+            color: var(--accent-teal);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Setup & Controls Bar */
+        .controls-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .input-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.65rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-teal);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        button:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-start {
+            background-color: var(--accent-teal);
+            color: #0f172a;
+        }
+
+        .btn-reset {
+            background-color: var(--border-color);
+            color: var(--text-light);
+        }
+
+        /* Scoreboard */
+        .scoreboard {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background-color: rgba(20, 184, 166, 0.15);
+            color: var(--accent-teal);
+            margin-bottom: 1.25rem;
+        }
+
+        .status-badge.halftime {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--accent-amber);
+        }
+
+        .status-badge.final {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .team-box h2 {
+            font-size: 1.35rem;
+            margin-bottom: 0.25rem;
+            word-break: break-word;
+        }
+
+        .possession-tag {
+            font-size: 0.75rem;
+            color: var(--accent-teal);
+            font-weight: 600;
+            height: 1.2rem;
+        }
+
+        .score-digits {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-top: 0.5rem;
+        }
+
+        .vs-divider {
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* Play-by-Play Feed */
+        .feed-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .feed-header h3 {
+            font-size: 1.05rem;
+        }
+
+        .feed-header span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .log-list {
+            list-style: none;
+            max-height: 360px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .log-item {
+            background-color: var(--bg-input);
+            border-left: 3px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.92rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .log-item.goal-home {
+            border-left-color: var(--accent-teal);
+        }
+
+        .log-item.goal-away {
+            border-left-color: var(--accent-amber);
+        }
+
+        .log-item.system {
+            border-left-color: var(--text-muted);
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .log-score {
+            font-weight: 700;
+            white-space: nowrap;
+            background-color: var(--bg-card);
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .score-digits { font-size: 3rem; }
+            .team-box h2 { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ULTIMATE <span>SIMULATOR</span></h1>
+        <p>Game to 15 &bull; Win by 2 &bull; Hard Cap at 17</p>
+    </header>
+
+    <!-- Controls -->
+    <div class="controls-card">
+        <div class="input-group">
+            <label for="home-name">Home Team (Dark)</label>
+            <input type="text" id="home-name" value="Apex Ultimate" maxlength="22">
+        </div>
+        <div class="input-group">
+            <label for="away-name">Away Team (White)</label>
+            <input type="text" id="away-name" value="Riptide" maxlength="22">
+        </div>
+        <div class="input-group">
+            <label for="sim-speed">Simulation Speed</label>
+            <select id="sim-speed">
+                <option value="1400">Normal (1.4s / pt)</option>
+                <option value="600" selected>Fast (0.6s / pt)</option>
+                <option value="150">Turbo (0.15s / pt)</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <button class="btn-start" id="start-btn" onclick="startSimulation()">Simulate</button>
+            <button class="btn-reset" id="reset-btn" onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+
+    <!-- Scoreboard -->
+    <div class="scoreboard">
+        <div class="status-badge" id="game-status">Ready for Pull</div>
+        <div class="score-grid">
+            <div class="team-box">
+                <h2 id="display-home-name">Apex Ultimate</h2>
+                <div class="possession-tag" id="home-offense"></div>
+                <div class="score-digits" id="home-score">0</div>
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="team-box">
+                <h2 id="display-away-name">Riptide</h2>
+                <div class="possession-tag" id="away-offense"></div>
+                <div class="score-digits" id="away-score">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Play-by-Play Feed -->
+    <div class="feed-card">
+        <div class="feed-header">
+            <h3>Point-by-Point Commentary</h3>
+            <span id="point-counter">Points Played: 0</span>
+        </div>
+        <ul class="log-list" id="play-log">
+            <li class="log-item system">Click "Simulate" to flip the disc and start the match.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    let homeScore = 0;
+    let awayScore = 0;
+    let pointsPlayed = 0;
+    let offenseTeam = 'home'; // 'home' or 'away'
+    let halfTimeTaken = false;
+    let simTimer = null;
+    let isRunning = false;
+
+    const plays = [
