@@ -356,4 +356,185 @@
     let simTimer = null;
     let isRunning = false;
 
-    const plays = [
+    const plays = ["threads a 50-yard backhand huck into the back corner for the score!",
+        "grinds out a 14-pass patient possession before hitting a crisp IO flick in the endzone.",
+        "gets a massive layout D at mid-field and converts the fast break!",
+        "launches a high-release hammer over the zone defense for a clean grab!",
+        "capitalizes on a stall-out turnover and punches in a quick give-and-go goal.",
+        "skies a pack of defenders in the endzone to haul in a floaty deep shot!",
+        "intercepts a swing pass in the endzone for a huge Callahan goal!",
+        "works the disc cleanly up the break side for an effortless score."
+    ];
+    function updateTeamHeaders() {
+        const homeInput = document.getElementById('home-name').value.trim() || "Home";
+        const awayInput = document.getElementById('away-name').value.trim() || "Away";
+        document.getElementById('display-home-name').textContent = homeInput;
+        document.getElementById('display-away-name').textContent = awayInput;
+        return { home: homeInput, away: awayInput };
+    }
+    function updateOffenseIndicator() {
+        document.getElementById('home-offense').textContent = offenseTeam === 'home' ? 'PULLING / ON D' : 'RECEIVING / ON O';
+        document.getElementById('away-offense').textContent = offenseTeam === 'away' ? 'PULLING / ON D' : 'RECEIVING / ON O';
+    }
+    function addLog(message, type = 'system', showScore = false) {
+        const logList = document.getElementById('play-log');
+        const li = document.createElement('li');
+        li.className = log-item ${type};
+        const textSpan = document.createElement('span');
+        textSpan.textContent = message;
+        li.appendChild(textSpan);
+        if (showScore) {
+            const scoreSpan = document.createElement('span');
+            scoreSpan.className = 'log-score';
+            scoreSpan.textContent = ${homeScore} - ${awayScore};
+            li.appendChild(scoreSpan);
+        }
+        logList.prepend(li);
+    }
+    function startSimulation() {
+        if (isRunning) return;
+        // If game already finished, reset first
+        if (checkWinner()) {
+            resetGame();
+        }
+        const teams = updateTeamHeaders();
+        isRunning = true;
+        document.getElementById('start-btn').disabled = true;
+        document.getElementById('home-name').disabled = true;
+        document.getElementById('away-name').disabled = true;
+        const statusBadge = document.getElementById('game-status');
+        statusBadge.textContent = "In Progress";
+        statusBadge.className = "status-badge";
+        if (pointsPlayed === 0) {
+            document.getElementById('play-log').innerHTML = '';
+            offenseTeam = Math.random() < 0.5 ? 'home' : 'away';
+            const receivingTeam = offenseTeam === 'home' ? teams.home : teams.away;
+            addLog(Disc flip complete! ${receivingTeam} receives the opening pull.);
+        }
+        updateOffenseIndicator();
+        const speed = parseInt(document.getElementById('sim-speed').value, 10);
+        simTimer = setInterval(simulatePoint, speed);
+    }
+    function simulatePoint() {
+        const teams = updateTeamHeaders();
+        pointsPlayed++;
+        document.getElementById('point-counter').textContent = Points Played: ${pointsPlayed};
+        // Slight edge (58%) to the team starting on offense (holding vs breaking)
+        const offenseScores = Math.random() < 0.58;
+        const scoringTeam = offenseScores ? offenseTeam : (offenseTeam === 'home' ? 'away' : 'home');
+        const wasBreak = !offenseScores;
+        if (scoringTeam === 'home') {
+        homeScore++;
+        document.getElementById('home-score').textContent = homeScore;
+        } else {
+        awayScore++;
+        document.getElementById('away-score').textContent = awayScore;
+        }
+        const teamName = scoringTeam === 'home' ? teams.home : teams.away;
+        const playDesc = plays[Math.floor(Math.random() * plays.length)];
+        const tag = wasBreak ? "[BREAK]" : "[HOLD]";
+        const logType = scoringTeam === 'home' ? 'goal-home' : 'goal-away';
+        addLog(${tag} ${teamName} ${playDesc}, logType, true);
+        // Scoring team pulls next point, so the other team receives (goes on offense)
+        offenseTeam = scoringTeam === 'home' ? 'away' : 'home';
+        updateOffenseIndicator();
+        // Check Half-Time (first team to 8)
+        if (!halfTimeTaken && (homeScore === 8 || awayScore === 8)) {
+            halfTimeTaken = true;
+            const statusBadge = document.getElementById('game-status');
+            statusBadge.textContent = "Half-Time";
+            statusBadge.className = "status-badge halftime";
+            addLog(HALF-TIME! ${teams.home} ${homeScore}, ${teams.away} ${awayScore}.);
+        } else {
+            const statusBadge = document.getElementById('game-status');
+            if (homeScore >= 14 && awayScore >= 14) {
+                statusBadge.textContent = homeScore === 16 && awayScore === 16 ? "Universe Point (16-16)!" : "Cap On — Win by 2";
+            } else {
+                statusBadge.textContent = "In Progress";
+            }
+            statusBadge.className = "status-badge";
+        }
+        // Check Winner
+        const winner = checkWinner();
+        if (winner) {
+            clearInterval(simTimer);
+            isRunning = false;
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('home-name').disabled = false;
+            document.getElementById('away-name').disabled = false;
+            document.getElementById('home-offense').textContent = '';
+            document.getElementById('away-offense').textContent = '';
+            const statusBadge = document.getElementById('game-status');
+            statusBadge.textContent = Final — ${winner} Wins!;
+            statusBadge.className = "status-badge final";
+            addLog(GAME OVER! ${winner} defeats ${winner === teams.home ? teams.away : teams.home} (${homeScore} - ${awayScore}).);
+        }
+    }
+    function checkWinner() {
+        const teams = updateTeamHeaders();
+        if ((homeScore >= 15 && homeScore - awayScore >= 2) || homeScore === 17) {
+            return teams.home;
+        }
+        if ((awayScore >= 15 && awayScore - homeScore >= 2) || awayScore === 17) {
+            return teams.away;
+        }
+        return null;
+    }
+    function resetGame() {
+        clearInterval(simTimer);
+        isRunning = false;
+        homeScore = 0;
+        awayScore = 0;
+        pointsPlayed = 0;
+        halfTimeTaken = false;
+        updateTeamHeaders();
+        document.getElementById('home-score').textContent = '0';
+        document.getElementById('away-score').textContent = '0';
+        document.getElementById('point-counter').textContent = 'Points Played: 0';
+        document.getElementById('home-offense').textContent = '';
+        document.getElementById('away-offense').textContent = '';
+        const statusBadge = document.getElementById('game-status');
+        statusBadge.textContent = 'Ready for Pull';
+        statusBadge.className = 'status-badge';
+        document.getElementById('start-btn').disabled = false;
+        document.getElementById('home-name').disabled = false;
+        document.getElementById('away-name').disabled = false;
+        document.getElementById('play-log').innerHTML = 'Click "Simulate" to flip the disc and start the match.';
+    }
+
+    function startSimulation() {
+            if (isRunning) return;
+
+            if (checkWinner()) {
+                resetGame();
+            }
+
+            const teams = updateTeamHeaders();
+            isRunning = true;
+            startBtn.disabled = true;
+            homeInput.disabled = true;
+            awayInput.disabled = true;
+
+            statusBadge.textContent = "In Progress";
+            statusBadge.className = "status-badge";
+
+            if (pointsPlayed === 0) {
+                playLog.innerHTML = '';
+                offenseTeam = Math.random() < 0.5 ? 'home' : 'away';
+                const receivingTeam = offenseTeam === 'home' ? teams.home : teams.away;
+                addLog(`Disc flip complete! ${receivingTeam} receives the opening pull.`);
+            }
+
+            updateOffenseIndicator();
+
+            const speed = parseInt(speedSelect.value, 10);
+            simTimer = setInterval(simulatePoint, speed);
+        }
+
+        startBtn.addEventListener('click', startSimulation);
+        resetBtn.addEventListener('click', resetGame);
+    });
+</script>
+
+</body>
+</html>
