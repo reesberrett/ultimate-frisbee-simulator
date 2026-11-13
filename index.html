@@ -4,16 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ultimate Frisbee Simulator</title>
+  <!-- Link to the external stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div class="container">
+    <!-- Page Title and Rule Summary -->
     <header>
       <h1>ULTIMATE <span>SIMULATOR</span></h1>
       <p>Game to 15 &bull; Win by 2 &bull; Hard Cap at 17</p>
     </header>
 
+    <!-- Game Setup & Action Controls -->
     <div class="controls-card">
       <div class="input-group">
         <label for="home-name">Home Team (Dark)</label>
@@ -26,6 +29,7 @@
       <div class="input-group">
         <label for="sim-speed">Simulation Speed</label>
         <select id="sim-speed">
+          <option value="2800">Slow (2.8s / pt)</option>
           <option value="1400">Normal (1.4s / pt)</option>
           <option value="600" selected>Fast (0.6s / pt)</option>
           <option value="150">Turbo (0.15s / pt)</option>
@@ -37,6 +41,7 @@
       </div>
     </div>
 
+    <!-- Live Scoreboard & Possession Display -->
     <div class="scoreboard">
       <div class="status-badge" id="game-status">Ready for Pull</div>
       <div class="score-grid">
@@ -54,6 +59,7 @@
       </div>
     </div>
 
+    <!-- Scrolling Point-by-Point Commentary Log -->
     <div class="feed-card">
       <div class="feed-header">
         <h3>Point-by-Point Commentary</h3>
@@ -65,6 +71,7 @@
     </div>
   </div>
 
+  <!-- Link to the external JavaScript logic -->
   <script src="script.js"></script>
 </body>
 </html>
