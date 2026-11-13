@@ -109,6 +109,7 @@ function simulatePoint() {
   // Stop simulation and announce winner if win condition is met
   var winner = checkWinner();
   if (winner) {
+    recordCompletedGame(winner, teams.home, teams.away, homeScore, awayScore);
     clearInterval(simTimer);
     isRunning = false;
     document.getElementById('start-btn').disabled = false;
@@ -129,6 +130,7 @@ function startSimulation() {
   if (checkWinner()) resetGame();
 
   var teams = updateTeamHeaders();
+  savePreferences()
   isRunning = true;
   document.getElementById('start-btn').disabled = true;
   document.getElementById('home-name').disabled = true;
@@ -177,6 +179,97 @@ function resetGame() {
   document.getElementById('play-log').innerHTML = '<li class="log-item system">Click "Simulate" to flip the disc and start the match.</li>';
 }
 
+// Load saved preferences, series record, and match history on page load
+function loadSavedData() {
+  // 1. Restore team names and speed preference
+  var savedHome = localStorage.getItem('ult_home_name');
+  var savedAway = localStorage.getItem('ult_away_name');
+  var savedSpeed = localStorage.getItem('ult_sim_speed');
+
+  if (savedHome) document.getElementById('home-name').value = savedHome;
+  if (savedAway) document.getElementById('away-name').value = savedAway;
+  if (savedSpeed) document.getElementById('sim-speed').value = savedSpeed;
+  updateTeamHeaders();
+
+  // 2. Restore series record
+  updateSeriesDisplay();
+
+  // 3. Restore match history list
+  renderHistory();
+}
+
+// Save team names and speed whenever the user changes them
+function savePreferences() {
+  localStorage.setItem('ult_home_name', document.getElementById('home-name').value.trim());
+  localStorage.setItem('ult_away_name', document.getElementById('away-name').value.trim());
+  localStorage.setItem('ult_sim_speed', document.getElementById('sim-speed').value);
+}
+
+// Update the All-Time Series display from localStorage
+function updateSeriesDisplay() {
+  var homeWins = parseInt(localStorage.getItem('ult_home_wins') || '0', 10);
+  var awayWins = parseInt(localStorage.getItem('ult_away_wins') || '0', 10);
+  var teams = updateTeamHeaders();
+  document.getElementById('series-record').textContent =
+    'All-Time Series: ' + teams.home + ' ' + homeWins + ' — ' + teams.away + ' ' + awayWins;
+}
+
+// Save a finished game to localStorage
+function recordCompletedGame(winnerName, homeTeam, awayTeam, hScore, aScore) {
+  // Increment win counter
+  if (winnerName === homeTeam) {
+    var hWins = parseInt(localStorage.getItem('ult_home_wins') || '0', 10) + 1;
+    localStorage.setItem('ult_home_wins', hWins);
+  } else {
+    var aWins = parseInt(localStorage.getItem('ult_away_wins') || '0', 10) + 1;
+    localStorage.setItem('ult_away_wins', aWins);
+  }
+  updateSeriesDisplay();
+
+  // Parse existing history array (or default to empty array)
+  var history = JSON.parse(localStorage.getItem('ult_match_history') || '[]');
+  var entry = winnerName + ' defeated ' + (winnerName === homeTeam ? awayTeam : homeTeam) + ' (' + hScore + ' - ' + aScore + ')';
+
+  // Add newest game to the front and keep only the last 5 games
+  history.unshift(entry);
+  if (history.length > 5) history.pop();
+
+  localStorage.setItem('ult_match_history', JSON.stringify(history));
+  renderHistory();
+}
+
+// Render saved match history items into the UI
+function renderHistory() {
+  var history = JSON.parse(localStorage.getItem('ult_match_history') || '[]');
+  var historyList = document.getElementById('history-log');
+  historyList.innerHTML = '';
+
+  if (history.length === 0) {
+    historyList.innerHTML = '<li class="log-item system">No completed games saved yet.</li>';
+    return;
+  }
+
+  for (var i = 0; i < history.length; i++) {
+    var li = document.createElement('li');
+    li.className = 'log-item';
+    li.textContent = history[i];
+    historyList.appendChild(li);
+  }
+}
+
+// Wipe saved history and series wins
+function clearHistory() {
+  localStorage.removeItem('ult_match_history');
+  localStorage.removeItem('ult_home_wins');
+  localStorage.removeItem('ult_away_wins');
+  updateSeriesDisplay();
+  renderHistory();
+}
+
+
 // Attach click event listeners to the control buttons
 document.getElementById('start-btn').addEventListener('click', startSimulation);
 document.getElementById('reset-btn').addEventListener('click', resetGame);
+document.getElementById('clear-history-btn').addEventListener('click', clearHistory);
+loadSavedData();
+
